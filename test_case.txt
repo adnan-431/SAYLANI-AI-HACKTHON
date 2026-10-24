@@ -1,0 +1,183 @@
+SMART BUS TICKET BOOKING SYSTEM - TEST CASES
+============================================
+
+Program tested : bus_booking_simple.py
+Test date      : 25 October 2026
+Method         : Each test was run against the program with scripted keyboard
+                 input, starting from a fresh state (no bus_data.json) unless
+                 the test needs earlier steps (for example, cancelling a
+                 booking requires booking first).
+
+Starting data: R101 40 seats (Rs. 1200), R102 36 (Rs. 2000), R103 32 (Rs. 800),
+               R104 45 (Rs. 5000), R105 30 (Rs. 1500).
+
+
+------------------------------------------------------------------------------
+TC-01  View all routes
+------------------------------------------------------------------------------
+Scenario        : View all routes
+Input / action  : Choose option 1 (View Routes).
+Expected result : 
+
+AVAILABLE BUS ROUTES
+------------------------------------------------------------------------------------------
+No.  Route    Journey                             Departure    Fare        Seats
+------------------------------------------------------------------------------------------
+1    R101     Karachi -> Hyderabad                08:00 AM     Rs.1200     40/40 (Available)
+2    R102     Karachi -> Sukkur                   09:30 AM     Rs.2000     36/36 (Available)
+3    R103     Hyderabad -> Mirpur Khas            11:00 AM     Rs.800      32/32 (Available)
+4    R104     Karachi -> Lahore                   07:00 PM     Rs.5000     45/45 (Available)
+5    R105     Sukkur -> Hyderabad                 02:00 PM     Rs.1500     30/30 (Available)
+Actual result   : Table showed all five routes (R101 to R105), each with
+                  departure time, fare, and seats, for example
+                  "40/40 (Available)".
+Matched         : YES
+
+------------------------------------------------------------------------------
+TC-02  Search Hyderabad
+------------------------------------------------------------------------------
+Scenario        : Search by city name
+Input / action  : Option 2, search "Hyderabad".
+Expected result : Enter your choice: 2
+Enter route ID or city: hyderabad
+R101 | Karachi -> Hyderabad | 08:00 AM | Rs. 1200 | 40/40 seats (Available)
+R103 | Hyderabad -> Mirpur Khas | 11:00 AM | Rs. 800 | 32/32 seats (Available)
+R105 | Sukkur -> Hyderabad | 02:00 PM | Rs. 1500 | 30/30 seats (Available)
+
+Actual result   : Three routes shown:
+                  R101 Karachi -> Hyderabad
+                  R103 Hyderabad -> Mirpur Khas
+                  R105 Sukkur -> Hyderabad
+Matched         : YES
+
+------------------------------------------------------------------------------
+TC-03  Unknown city
+------------------------------------------------------------------------------
+Scenario        : Search for a city that does not exist
+Input / action  : Option 2, search "Atlantis".
+Expected result :Enter your choice: 2
+Enter route ID or city: atlantis
+No matching route found.
+Actual result   : "No matching route found." The menu appeared again and the
+                  program kept running (exited normally with option 9).
+Matched         : YES
+
+------------------------------------------------------------------------------
+TC-04  Book two seats
+------------------------------------------------------------------------------
+Scenario        : Normal booking
+Input / action  : Option 3: name Ahmed, age 25, route R101, 2 seats.
+Expected result : 
+Booking confirmed!
+Booking ID: B1001
+Route: Karachi -> Hyderabad
+Seats: 2
+Total fare: Rs. 2400
+Actual result   : "Booking confirmed!", Booking ID B1001, Total fare Rs. 2400.
+                  Route list afterwards showed R101 at 38/40 (Partially
+                  Booked).
+                  Note: the amount is correct, but the program prints it as
+                  "Rs. 2400" without a thousands comma.
+Matched         : YES
+
+------------------------------------------------------------------------------
+TC-05  Zero seats
+------------------------------------------------------------------------------
+Scenario        : Booking with 0 seats
+Input / action  : Option 3: Ahmed, 25, R101, then 0 seats.
+Expected result : Reject; no booking or seat change.
+Actual result   : "Please enter a whole number greater than zero." The program
+                  asked for the number of seats again. No booking was
+                  created and nothing was saved (no data file was written).
+Matched         : YES
+
+------------------------------------------------------------------------------
+TC-06  Too many seats
+------------------------------------------------------------------------------
+Scenario        : Request more seats than available
+Input / action  : Option 3: Ahmed, 25, R101, 41 seats (only 40 available).
+Expected result : Reject; availability never becomes negative.
+Actual result   : "Only 40 seats are available." Booking history showed
+                  "No bookings found." and R101 stayed at 40/40.
+Matched         : YES
+
+------------------------------------------------------------------------------
+TC-07  Cancel confirmed booking
+------------------------------------------------------------------------------
+Scenario        : Cancel a Confirmed booking
+Input / action  : Book 2 seats on R101 (B1001), then option 5 with B1001.
+Expected result : Status changes and correct seats are restored.
+Actual result   : "Booking B1001 cancelled. 2 seats restored." History showed
+                  status "Cancelled" and R101 went back to 40/40.
+Matched         : YES
+
+------------------------------------------------------------------------------
+TC-08  Cancel same booking again
+------------------------------------------------------------------------------
+Scenario        : Cancel an already cancelled booking
+Input / action  : Cancel B1001 once, then enter B1001 again.
+Expected result : Reject; no additional seat restoration.
+Actual result   : First cancel succeeded. Second attempt gave "This booking is
+                  already cancelled." R101 stayed at 40/40 (not 42/40).
+Matched         : YES
+
+------------------------------------------------------------------------------
+TC-09  Report with no bookings
+------------------------------------------------------------------------------
+Scenario        : Generate report with an empty booking list
+Input / action  : Option 7 on a fresh start.
+Expected result : Booking totals and revenue are zero; route status is still
+                  counted.
+Actual result   : Total bookings 0, Confirmed 0, Cancelled 0, Seats reserved 0,
+                  Revenue Rs. 0, Fully booked routes 0, and all five routes
+                  listed with 0 seats and Rs. 0.
+                  Note: the first run of this test FAILED because the report
+                  had no "Fully booked routes" line (it was dropped when the
+                  code was simplified). The line was added back and the test
+                  was run again.
+Matched         : YES (after fix)
+
+------------------------------------------------------------------------------
+TC-10  Book all seats
+------------------------------------------------------------------------------
+Scenario        : Book exactly the remaining seats
+Input / action  : Option 3: Ahmed, 25, R103, 32 seats (all 32 available).
+Expected result : Booking succeeds; availability zero; Fully Booked status.
+Actual result   : Booking confirmed, B1001, Total fare Rs. 25600. Route list
+                  showed R103 as "0/32 (Fully Booked)". Option 6 (routes with
+                  free seats) no longer listed R103.
+Matched         : YES
+
+------------------------------------------------------------------------------
+TC-11  Report after cancellation
+------------------------------------------------------------------------------
+Scenario        : Cancel a booking, then generate the report
+Input / action  : Book 2 seats on R101, cancel B1001, then option 7.
+Expected result : Cancelled count increases; cancelled fare excluded.
+Actual result   : Total bookings 1, Confirmed 0, Cancelled 1, Seats reserved 0,
+                  Revenue Rs. 0. The Rs. 2400 fare of the cancelled booking
+                  was not counted.
+Matched         : YES
+
+------------------------------------------------------------------------------
+TC-12  Invalid menu option
+------------------------------------------------------------------------------
+Scenario        : Unsupported menu input
+Input / action  : Enter "abc", then "10", then an empty line.
+Expected result : Helpful error; program returns to menu.
+Actual result   : Each entry gave "Invalid choice. Enter a number from 1 to 9."
+                  and the menu was shown again.
+Matched         : YES
+
+
+------------------------------------------------------------------------------
+SUMMARY
+------------------------------------------------------------------------------
+Total tests : 12
+Matched     : 12
+Not matched : 0
+
+Notes:
+- TC-09 failed on the first run and passed after the "Fully booked routes"
+  line was restored in the report.
+- Fares are displayed without thousands separators (Rs. 2400, not Rs. 2,400).
